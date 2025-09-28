@@ -15,11 +15,6 @@
 #include <redis.hpp>
 #include <signal.h>
 
-namespace beast = boost::beast; // from <boost/beast.hpp>
-namespace http = beast::http;   // from <boost/beast/http.hpp>
-namespace net = boost::asio;    // from <boost/asio.hpp>
-using tcp = net::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
-
 // This class handles an HTTP server connection.
 class Session : public std::enable_shared_from_this<Session> {
   tcp::socket socket_;
