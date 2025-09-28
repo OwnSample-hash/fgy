@@ -27,8 +27,12 @@ namespace urls = boost::urls;
 namespace mysql = boost::mysql;
 namespace asio = boost::asio;
 namespace po = boost::program_options;
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace net = boost::asio;
 
 using endpoint_type = boost::asio::ip::tcp::endpoint;
 using req = http::request<http::string_body> const;
 using res = http::response<http::string_body>;
 using json = nlohmann::json;
+using tcp = net::ip::tcp;
