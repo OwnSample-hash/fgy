@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "mariadb.hpp"
 #include "middlewares/logging.hpp"
 #include "router.hpp"
 #include <boost/asio/ip/tcp.hpp>
@@ -168,6 +169,8 @@ int main(int argc, const char **argv) {
     return 1;
   }
   signal(SIGINT, handle_stop);
+  signal(SIGTERM, handle_stop);
+  Mariadb db;
   c = redisConnect("127.0.0.1", 6379);
   if (c == NULL || c->err) {
     if (c != NULL) {

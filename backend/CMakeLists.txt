@@ -14,11 +14,16 @@ set(JWT_BUILD_EXAMPLES off CACHE BOOL "Build the examples" FORCE)
 CPMAddPackage("gh:Thalhammer/jwt-cpp@0.7.1")
 
 find_package(Boost REQUIRED COMPONENTS system filesystem url program_options)
-include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include  nlohmann_json::nlohmann_json hiredis::hiredis jwt-cpp) 
+find_package(OpenSSL REQUIRED)
+
+include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include  nlohmann_json::nlohmann_json hiredis::hiredis jwt-cpp)
 
 add_executable(api
-  ${CMAKE_SOURCE_DIR}/src/main.cpp
-  ${CMAKE_SOURCE_DIR}/src/router.cpp
   ${CMAKE_SOURCE_DIR}/src/config.cpp
+  ${CMAKE_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_SOURCE_DIR}/src/mariadb.cpp
+  ${CMAKE_SOURCE_DIR}/src/mysql.cpp
+  ${CMAKE_SOURCE_DIR}/src/router.cpp
 )
-target_link_libraries(api ${Boost_LIBRARIES}  nlohmann_json::nlohmann_json hiredis::hiredis jwt-cpp pthread argon2)
+target_link_libraries(api ${Boost_LIBRARIES} nlohmann_json::nlohmann_json hiredis::hiredis jwt-cpp pthread argon2 OpenSSL::Crypto OpenSSL::SSL)
+target_compile_definitions(api PRIVATE BOOST_MYSQL_SEPARATE_COMPILATION)
