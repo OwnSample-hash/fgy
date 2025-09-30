@@ -113,10 +113,13 @@ void handle_stop(int) {
   exit(0);
 }
 
+void showVersions();
+
 int main(int argc, const char **argv) {
   po::options_description desc;
   desc.add_options()("help,h", "Show help message")(
-      "config,c", po::value<std::string>(), "Path to config file");
+      "config,c", po::value<std::string>(),
+      "Path to config file")("version,v", "Show version information");
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -127,6 +130,10 @@ int main(int argc, const char **argv) {
   }
   if (vm.count("help")) {
     std::cout << desc << std::endl;
+    return 0;
+  }
+  if (vm.count("version")) {
+    showVersions();
     return 0;
   }
   try {
