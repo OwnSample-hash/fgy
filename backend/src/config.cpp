@@ -25,9 +25,9 @@ void Config::save(const std::string &path) {
   file.close();
 }
 
-json Config::get() { return config; }
+json &Config::get() { return config; }
 
-json Config::get(const std::string &key) {
+json &Config::get(const std::string &key) {
   if (config.contains(key)) {
     return config[key];
   }
