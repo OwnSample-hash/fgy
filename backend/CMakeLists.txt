@@ -24,6 +24,9 @@ add_executable(api
   ${CMAKE_SOURCE_DIR}/src/config.cpp
   ${CMAKE_SOURCE_DIR}/src/main.cpp
   ${CMAKE_SOURCE_DIR}/src/router.cpp
+  ${CMAKE_SOURCE_DIR}/src/version.cpp
 )
 target_link_libraries(api PRIVATE ${Boost_LIBRARIES} nlohmann_json::nlohmann_json hiredis::hiredis jwt-cpp pthread argon2 OpenSSL::Crypto OpenSSL::SSL TinyOrm::TinyOrm)
-target_compile_definitions(api PRIVATE BOOST_MYSQL_SEPARATE_COMPILATION)
+execute_process(COMMAND git rev-parse --short HEAD OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_COMMIT_HASH)
+message(STATUS "Git commit hash: ${GIT_COMMIT_HASH}")
+target_compile_definitions(api PRIVATE GIT_SHASH="${GIT_COMMIT_HASH}")
