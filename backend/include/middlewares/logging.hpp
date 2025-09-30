@@ -15,11 +15,12 @@ public:
   LoggingMiddleware() = default;
   LoggingMiddleware(std::ostream &out) : out(out) {}
   ~LoggingMiddleware() override = default;
-  MiddlewareResult before(req &request, const endpoint_type &) override {
+  MiddlewareResult before(const req &request, const endpoint_type &) override {
     UserAgent = request[http::field::user_agent];
     return CONTINUE;
   }
-  MiddlewareResult after(res &response, const endpoint_type &rep) override {
+  MiddlewareResult after(const res &response,
+                         const endpoint_type &rep) override {
     auto now = std::chrono::system_clock::now();
     out << rep.address().to_string() << " - ["
         << std::format("{:%d}/{:%b}/{:%Y}:{:%H}:{:%M}:{:%S0} {:%z}", now, now,
