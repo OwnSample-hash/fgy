@@ -16,8 +16,8 @@ public:
 
   void load(const std::string &path);
   void save(const std::string &path);
-  json get();
-  json get(const std::string &key);
+  json &get();
+  json &get(const std::string &key);
   void set(const std::string &key, const json &value);
 };
 

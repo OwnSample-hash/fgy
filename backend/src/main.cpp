@@ -139,16 +139,16 @@ int main(int argc, const char **argv) {
   } catch (const FileNotFound &e) {
     std::cerr << e.what() << ", creating default config" << std::endl;
     config.set("argon2", {
-                             {"t_cost", 1},
                              {"m_cost", 65536},
                              {"parallelism", 1},
+                             {"t_cost", 1},
                          });
     config.set("database", {
                                {"name", "mydb"},
-                               {"user", "admin"},
+                               {"host", "host.docker.internal"},
                                {"password", "admin"},
-                               {"host", "127.0.0.1"},
                                {"port", 3306},
+                               {"user", "admin"},
                            });
     config.set("http", {
                            {"bind", "0.0.0.0"},
@@ -156,8 +156,8 @@ int main(int argc, const char **argv) {
                        });
     config.set("redis", {
                             {"host", "127.0.0.1"},
-                            {"port", 6379},
                             {"password", ""},
+                            {"port", 6379},
                         });
     if (vm.count("config")) {
       config.save(vm["config"].as<std::string>());
