@@ -2,12 +2,15 @@
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/mysql/connection.hpp>
+#include <boost/mysql/error_with_diagnostics.hpp>
 #include <boost/mysql/handshake_params.hpp>
 #include <boost/mysql/tcp.hpp>
+#include <boost/throw_exception.hpp>
 #include <common.hpp>
 #include <condition_variable>
 #include <config.hpp>
 #include <functional>
+#include <iostream>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -42,7 +45,18 @@ public:
     auto endpoints =
         resolver.resolve(std::string(config.get("database")["host"]),
                          std::string(config.get("database")["port"].dump()));
-    conn.connect(*endpoints.begin(), params);
+    try {
+
+      conn.connect(*endpoints.begin(), params);
+    } catch (const boost::wrapexcept<boost::mysql::error_with_diagnostics> &e) {
+      std::cerr << "Error connecting to database: " << e.what() << std::endl;
+      std::cerr << e.get_diagnostics().client_message() << std::endl;
+      std::cerr << config.get("database") << std::endl;
+      for (const auto &ep : endpoints) {
+        std::cerr << "Tried endpoint: " << ep.endpoint() << std::endl;
+      }
+      throw;
+    }
     worker_thread = std::thread(&Mariadb::worker, this);
   };
   ~Mariadb() {
