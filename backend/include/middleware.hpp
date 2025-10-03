@@ -1,5 +1,6 @@
 #pragma once
 #include <handler.hpp>
+#include <string_view>
 
 enum MiddlewareResult { CONTINUE, ABORT };
 enum MiddlewareFire { BEFORE = 1, AFTER, BOTH = BEFORE | AFTER };
@@ -14,6 +15,5 @@ public:
     return CONTINUE;
   }
   virtual MiddlewareFire when() = 0;
-#warning                                                                       \
-    "Add and use a path property to limit middleware application to specific routes"
+  virtual std::string_view path() { return "*"; }
 };
