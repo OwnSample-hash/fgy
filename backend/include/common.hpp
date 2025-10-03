@@ -8,8 +8,6 @@
 #include <boost/url/url.hpp>
 #include <boost/url/url_view.hpp>
 #include <nlohmann/json.hpp>
-#include <orm/db.hpp>
-#include <orm/utils/configuration.hpp>
 
 #define HTTP_DEFUALT_FIELDS(request)                                           \
   request.set(http::field::server, "Beast");                                   \
@@ -38,6 +36,3 @@ using req = http::request<http::string_body> const;
 using res = http::response<http::string_body>;
 using json = nlohmann::json;
 using tcp = net::ip::tcp;
-using Orm::DB;
-using ConfigUtils = Orm::Utils::Configuration;
-using namespace Orm::Constants;
