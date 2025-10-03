@@ -8,7 +8,6 @@ using namespace std::literals;
 
 class LoggingMiddleware : public IMiddleware {
   std::ostream &out = std::cout;
-  std::string path = "*";
   std::string UserAgent = "";
 
 public:
