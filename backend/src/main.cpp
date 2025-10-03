@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "mariadb.hpp"
 #include "middlewares/logging.hpp"
 #include "router.hpp"
 #include <boost/asio/ip/tcp.hpp>
@@ -7,6 +8,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/config.hpp>
+#include <boost/mysql/row.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <cassert>
 #include <handlers/root.hpp>
@@ -176,6 +178,23 @@ int main(int argc, const char **argv) {
   }
   signal(SIGINT, handle_stop);
   signal(SIGTERM, handle_stop);
+
+  Mariadb db;
+  db.enqueue("SHOW TABLES", [](const mysql::results &res) {
+    std::cout << "Tables in the database:" << std::endl;
+    for (const auto &row : res.rows()) {
+      std::cout << row[0] << std::endl;
+    }
+  });
+
+  db.enqueue(
+      "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [](const mysql::results &res) {
+        std::cout << "Empty query executed." << std::endl;
+      },
+      "test", "test", "test", std::time(nullptr), true, true,
+      "2024-01-01 00:00:00");
+
   c = redisConnect("127.0.0.1", 6379);
   if (c == NULL || c->err) {
     if (c != NULL) {

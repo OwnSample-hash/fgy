@@ -1,6 +1,5 @@
 #include <common.hpp>
 #include <iostream>
-#include <orm/version.hpp>
 #include <redis.hpp>
 #include <tabulate.hpp>
 
@@ -30,7 +29,6 @@ void showVersions() {
   vtable.add_row({"nlohmann JSON", NLOHMANN_JSON_VERSION_STRING});
   vtable.add_row({"hiredis", HIREDIS_VERSION_STRING});
   vtable.add_row({"OpenSSL", OPENSSL_VERSION_TEXT});
-  vtable.add_row({"TinyORM", TINYORM_VERSION_STR});
   vtable.add_row({"tabulate", variant_lite_VERSION});
   std::cout << vtable << std::endl;
 }
