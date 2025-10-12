@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+uvicorn = "*"
+pyjwt = "*"
+pwdlib = {extras = ["argon2"], version = "*"}
+pydantic = "*"
+boto3 = "*"
+redis = "*"
+pymysql = "*"
+sqlalchemy = "*"
+python-dotenv = "*"
+python-multipart = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
