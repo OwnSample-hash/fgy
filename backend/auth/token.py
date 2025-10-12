@@ -2,10 +2,10 @@ import os
 import jwt
 from datetime import timedelta
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from db.models import UserSchema
 
@@ -21,7 +21,8 @@ from db import db, User, redis
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token",
+    scopes={"me": "Read information about the current user."})
 
 
 class Token(BaseModel):
@@ -31,30 +32,44 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    scopes: list[str] = []
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(security_scope: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]):
+    if security_scope.scopes:
+        authenticate_value = f'Bearer scope="{security_scope.scope_str}"'
+    else:
+        authenticate_value = "Bearer"
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": authenticate_value},
     )
     try:
         payload = jwt.decode(token, os.environ["JWT_KEY"], algorithms=[ALGORITHM])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except jwt.InvalidTokenError:
+        scope: str = payload.get("scope", "")
+        token_scopes = scope.split()
+        token_data = TokenData(username=username, scopes=token_scopes)
+    except (jwt.InvalidTokenError, ValidationError):
         raise credentials_exception
     with db.query_first(User, username=token_data.username) as user:
         if user is None:
             raise credentials_exception
+        for scope in security_scope.scopes:
+            if scope not in token_data.scopes:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Not enough permissions",
+                    headers={"WWW-Authenticate": authenticate_value},
+                )
         return UserSchema.model_validate(user)
 
 
 async def get_current_active_user(
-    current_user: Annotated[UserSchema, Depends(get_current_user)],
+    current_user: Annotated[UserSchema, Security(get_current_user, scopes=["me"])],
 ):
     return current_user
 
@@ -70,10 +85,42 @@ async def get_token(
             )
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token, tid = create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
+            data={"sub": user.username, "scope": " ".join(form_data.scopes)}, expires_delta=access_token_expires
         )
         redis.setex(f"token:{tid}", user.id, ex=ACCESS_TOKEN_EXPIRE_MINUTES * 60)
         return Token(access_token=access_token, token_type="bearer")
+
+
+@router.post("/refresh")
+async def refresh_token(token: Annotated[str, Depends(oauth2_scheme)]) -> Token:
+    try:
+        payload = jwt.decode(token, os.environ["JWT_KEY"], algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        tid = payload.get("tid")
+        if username is None or tid is None:
+            raise HTTPException(
+                status_code=401, detail="Could not validate credentials"
+            )
+        with db.query_first(User, username=username) as user:
+            if user is None:
+                raise HTTPException(
+                    status_code=401, detail="Could not validate credentials"
+                )
+            if redis.get(f"token:{tid}") is None:
+                raise HTTPException(
+                    status_code=401, detail="Could not validate credentials"
+                )
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token, new_tid = create_access_token(
+                data={"sub": user.username}, expires_delta=access_token_expires
+            )
+            redis.delete(f"token:{tid}")
+            redis.setex(
+                f"token:{new_tid}", user.id, ex=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            )
+            return Token(access_token=access_token, token_type="bearer")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 
 @router.post("/register")
