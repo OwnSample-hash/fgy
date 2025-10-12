@@ -1,4 +1,1 @@
-.cache
-build
-config.json
-*.rdb
+.env
