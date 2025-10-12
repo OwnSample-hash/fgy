@@ -10,9 +10,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 password_hasher = PasswordHash.recommended()
 
+
 def hash_password(password: str) -> str:
     """Hash a password for storing."""
     return password_hasher.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a stored password against one provided by user."""

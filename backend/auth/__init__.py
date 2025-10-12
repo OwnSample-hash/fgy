@@ -1,2 +1,2 @@
-from .hash  import *
+from .hash import *
 from .token import *

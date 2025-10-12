@@ -1,11 +1,14 @@
 import redis
 from .connection import Connection
 
-class Redis():
-    def __init__(self, con: Connection,  db=0):
+
+class Redis:
+    def __init__(self, con: Connection, db=0):
         self.host = con.host
         self.port = con.port
-        self.client = redis.StrictRedis(host=con.host, port=con.port, decode_responses=True, db=db)
+        self.client = redis.StrictRedis(
+            host=con.host, port=con.port, decode_responses=True, db=db
+        )
 
     def __repr__(self):
         return f"Redis(host={self.host}, port={self.port})"
@@ -27,10 +30,9 @@ class Redis():
 
     def get(self, key):
         return self.client.get(key)
- 
+
     def hget(self, name, key):
         return self.client.hget(name, key)
 
     def delete(self, key):
         self.client.delete(key)
-
