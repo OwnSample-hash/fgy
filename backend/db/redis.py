@@ -36,3 +36,11 @@ class Redis:
 
     def delete(self, key):
         self.client.delete(key)
+
+    def subscribe(self, channel):
+        pubsub = self.client.pubsub()
+        pubsub.subscribe(channel)
+        return pubsub
+
+    def publish(self, channel, message):
+        self.client.publish(channel, message)

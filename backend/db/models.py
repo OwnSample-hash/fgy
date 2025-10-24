@@ -9,6 +9,10 @@ class User(db.Base):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, index=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    used = db.Column(db.Integer, default=0, nullable=False)  # in MiB
+    quota = db.Column(db.Integer, default=10240, nullable=False)  # in MiB
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+
 
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"
@@ -28,7 +32,7 @@ class Files(db.Base):
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     filename = db.Column(db.String(255), nullable=False)
-    filepath = db.Column(db.String(255), nullable=False)
+    size = db.Column(db.Integer, nullable=False)  # in bytes
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     shared_with = db.Column(db.String(255), nullable=True)  # Comma-separated user IDs
 

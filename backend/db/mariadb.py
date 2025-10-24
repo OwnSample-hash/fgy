@@ -217,6 +217,17 @@ class MariaDB:
         with self.get_session() as session:
             yield session.query(model).filter_by(**filters).first()
 
+    @contextmanager
+    def transaction(self) -> Generator[Session, None, None]:
+        """
+        Context manager for a transaction.
+
+        Yields:
+            Session: SQLAlchemy session
+        """
+        with self.get_session() as session:
+            yield session
+
     def update(self, obj: Any) -> Any:
         """
         Update an existing object in the database.
