@@ -9,8 +9,8 @@ class User(db.Base):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, index=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    used = db.Column(db.Integer, default=0, nullable=False)  # in MiB
-    quota = db.Column(db.Integer, default=10240, nullable=False)  # in MiB
+    used = db.Column(db.Integer, default=0, nullable=False)  # in B
+    quota = db.Column(db.Integer, default=10240, nullable=False)  # in B
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 
 
