@@ -27,4 +27,4 @@ jobs:
           context: .
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fgy:frontend
+          tags: ghcr.io/${{ github.repository_owner }}/fgy:frontend
