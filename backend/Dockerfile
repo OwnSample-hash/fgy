@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir pipenv && \
 WORKDIR /app
 VOLUME /app/data
 
-COPY . /app
+COPY backend /app
 RUN chown -R appuser:appuser /app
 USER appuser
 
