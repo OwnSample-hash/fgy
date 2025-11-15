@@ -30,6 +30,21 @@ async def get_file(file_id: int, current_user: Annotated[auth.UserSchema, Depend
             return {"error": "File not found"}, 404
     return {"id": file.id, "filename": file.filename, "size": file.size}
 
+@file_router.get("/file/{file_id}/download")
+async def download_file(file_id: int, current_user: Annotated[auth.UserSchema, Depends(auth.get_current_user)]):
+    with db.transaction() as session:
+        cuser = session.query(User).get(current_user.id)
+        if not cuser:
+            return {"error": "User not found"}
+        file = session.query(Files).filter_by(id=file_id, owner_id=current_user.id).first()
+        if not file:
+            return {"error": "File not found"}, 404
+    presigned_url = s3.generate_presigned_url('get_object',
+                                              Params={'Bucket': 'mshare',
+                                                      'Key': cuser.id+"/"+file.filename},
+                                              ExpiresIn=3600)
+    return {"download_url": presigned_url}
+
 @file_router.delete("/file/{file_id}")
 async def delete_file(file_id: int, current_user: Annotated[auth.UserSchema, Depends(auth.get_current_user)], do_s3:bool=False):
     with db.transaction() as session:
