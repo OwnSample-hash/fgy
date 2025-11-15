@@ -10,6 +10,7 @@ else:
 
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from db import db
 from auth import router as auth_router
 from file import file_router as file_router, upload_router as file_upload_router
@@ -17,8 +18,22 @@ from sys import argv
 import uvicorn
 
 
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:3000",
+]
+
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(auth_router, tags=["auth"], prefix="/api")
+app.include_router(auth_router, tags=["auth_alt"])
 app.include_router(file_router, tags=["files"], prefix="/api")
 app.include_router(file_upload_router, tags=["files"], prefix="/api")
 
