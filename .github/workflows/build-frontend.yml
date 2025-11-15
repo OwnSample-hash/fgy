@@ -1,10 +1,9 @@
-name: Build backend docker image
+name: Build frontend docker image
 on:
   push:
 
-
 jobs:
-  build-backend:
+  build-frontend:
     runs-on: ubuntu-latest
     if: startsWith(github.event.head_commit.message, 'build.frontend:')
     steps:
@@ -16,7 +15,7 @@ jobs:
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
-        with: 
+        with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -30,6 +29,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./backend/Dockerfile
+          file: ./frontend/Dockerfile
           push: true
           tags: ghcr.io/${{ steps.set_env.outputs.REPO_OWNER_LOWER }}/fgy:frontend
