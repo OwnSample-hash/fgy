@@ -24,7 +24,7 @@ async def upload_file(file: UploadFile, current_user: Annotated[auth.UserSchema,
             size = file.file.tell()
             cuser.used += size
             file.file.seek(0)  # Reset to start of file
-        session.add(Files(filename=file.filename, owner_id=current_user.id, size=file.size or size))
+        session.add(Files(filename=file.filename, owner_id=current_user.id, original=current_user.id, size=file.size or size))
     if do_s3:
         s3.upload_fileobj(file.file, "mshare", cuser.id+"/"+file.filename)
     return {"filename": file.filename}

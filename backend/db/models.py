@@ -34,7 +34,7 @@ class Files(db.Base):
     filename = db.Column(db.String(255), nullable=False)
     size = db.Column(db.Integer, nullable=False)  # in bytes
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    shared_with = db.Column(db.String(255), nullable=True)  # Comma-separated user IDs
+    original = db.Column(db.Integer, nullable=False)  # refers to original user id if shared
 
     def __repr__(self):
         return (
