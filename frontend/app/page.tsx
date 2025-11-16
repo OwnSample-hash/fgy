@@ -28,7 +28,7 @@ export default function SimpleAPIUI() {
   };
 
   const login = async () => {
-    const form = new URLSearchParams();
+    const form = new FormData();
     form.append("username", username);
     form.append("password", password);
     const data = await api("/api/token", {
@@ -48,8 +48,13 @@ export default function SimpleAPIUI() {
   };
 
   const register = async () => {
-    await api(`/api/register?username=${username}&password=${password}&email=${email}`, {
+    const form = new FormData();
+    form.append("username", username);
+    form.append("password", password);
+    form.append("email", email);
+    await api(`/api/register`, {
       method: "POST",
+      body: form,
     });
   };
 
