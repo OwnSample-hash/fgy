@@ -49,7 +49,7 @@ async def download_file(file_id: int, current_user: Annotated[auth.UserSchema, D
                                               Params={'Bucket': 'mshare',
                                                       'Key': file.original+"/"+file.filename},
                                               ExpiresIn=3600)
-    return {"download_url": presigned_url, "error": None}
+    return {"download_url": presigned_url, "error": None, "filename": file.filename}
 
 @file_router.delete("/file/{file_id}")
 async def delete_file(file_id: int, current_user: Annotated[auth.UserSchema, Depends(auth.get_current_user)], do_s3:bool=False):
