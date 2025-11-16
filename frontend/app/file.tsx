@@ -4,13 +4,25 @@ import { Input } from "@/components/ui/input";
 import { InputGroup } from "@/components/ui/input-group";
 
 export default function FileInfo({file, i, api, userId, setFiles}: {file: string, i:number, userId: number, api: Function, setFiles: Function}) {
-  let data = JSON.parse(file);
+  const data = JSON.parse(file);
 
   const downloadFile = async () => {
-    // Implement download file logic here
+    const resp = await api(`/api/file/${data["id"]}/download`, {
+      method: "GET",
+    });
+    if (resp["error"]) {
+      alert(`Error downloading file: ${resp["error"]}`);
+      return;
+    }
+    const downloadLink = document.createElement("a");
+    downloadLink.href = resp["download_url"];
+    downloadLink.download = data["filename"];
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
-  const shareFile = async (e: any) => {
+  const shareFile = async () => {
     const userInput = document.getElementById(`${i}-user`) as HTMLInputElement;
     const username = userInput.value;
     if (!username) {
@@ -26,21 +38,20 @@ export default function FileInfo({file, i, api, userId, setFiles}: {file: string
   };
 
   const deleteFile = async () => {
-    api(`/api/file/${data["id"]}`, {
+    await api(`/api/file/${data["id"]}`, {
       method: "DELETE",
-    }    
-    );
-    const data2 = await api("/api/list_files");
-    setFiles(data2["files"] || []);
+    });
+    const filesData = await api("/api/list_files");
+    setFiles(filesData);
   };
 
   const getName = () => {
-    console.log(userId, Number(data["original"]));
     if (userId === Number(data["original"])) {
       return <span>{data["filename"]}</span>
     }
     else {
-      return <span>{data["filename"]} (shared by (unable to resolve))</span>
+      const ownerResp = data["owner_username"] || "unknown";
+      return <span>{data["filename"]} (shared by {ownerResp})</span>
     }
   };
 
@@ -48,9 +59,9 @@ export default function FileInfo({file, i, api, userId, setFiles}: {file: string
       {getName()}
       <InputGroup className="grid grid-cols-4 gap-2 border-0">
         <Button onClick={downloadFile} className="bg-green-500">Download</Button>
-        <Button onClick={deleteFile} className="bg-red-500" hidden={userId === Number(data["original"]) ? false : true}>Delete</Button>
-        <Button id={`${i}-share`} onClick={shareFile} hidden={userId === Number(data["original"]) ? false : true}>Share</Button>
-        <Input id={`${i}-user`} placeholder="Username" hidden={userId === Number(data["original"]) ? false : true}></Input>
+        <Button onClick={deleteFile} className="bg-red-500" disabled={userId === Number(data["original"]) ? false : true}>Delete</Button>
+        <Button id={`${i}-share`} onClick={shareFile} disabled={userId === Number(data["original"]) ? false : true}>Share</Button>
+        <Input id={`${i}-user`} placeholder="Username" disabled={userId === Number(data["original"]) ? false : true}></Input>
       </InputGroup>
   </div>;
 };
