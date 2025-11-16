@@ -2,7 +2,7 @@ import os
 import jwt
 from datetime import timedelta
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, Form, HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
 
 from pydantic import BaseModel, ValidationError
@@ -124,7 +124,7 @@ async def refresh_token(token: Annotated[str, Depends(oauth2_scheme)]) -> Token:
 
 
 @router.post("/register")
-async def register(username: str, password: str, email: str):
+async def register(username: Annotated[str, Form()], password: Annotated[str, Form()], email: Annotated[str, Form()]):
     with db.query_first(User, username=username) as user:
         if user:
             db.logger.warning(f"Attempt to register existing username: {username}")
