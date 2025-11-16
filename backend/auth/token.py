@@ -69,7 +69,7 @@ async def get_current_user(security_scope: SecurityScopes, token: Annotated[str,
 
 
 async def get_current_active_user(
-    current_user: Annotated[UserSchema, Security(get_current_user, scopes=["me"])],
+    current_user: Annotated[UserSchema, Security(get_current_user)],
 ):
     return current_user
 
@@ -149,8 +149,17 @@ async def logout(token: Annotated[str, Depends(oauth2_scheme)]):
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 
-@router.post("/user/me", response_model=UserSchema)
+@router.get("/user/me", response_model=UserSchema)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     return current_user
+
+@router.get("/user/{id}", response_model=UserSchema)
+async def read_user_by_username(id: int):
+    user2 = None
+    with db.query_first(User, id=id) as user:
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        user2 = UserSchema.model_validate(user)
+    return user2
